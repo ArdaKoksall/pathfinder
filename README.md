@@ -44,8 +44,8 @@ This project implements the A\* pathfinding algorithm in Java. The algorithm fin
 The grid used in the example is as follows:
 0 = free space, 1 = obstacle
     
-    ```
-{1, 1, 1, 0, 1, 1, 1, 1, 0, 0} \n
+
+{1, 1, 1, 0, 1, 1, 1, 1, 0, 0} 
 {1, 0, 1, 0, 1, 0, 0, 0, 0, 1}
 {1, 0, 1, 1, 1, 0, 1, 1, 1, 1}
 {1, 0, 0, 0, 0, 0, 1, 0, 1, 0}
@@ -55,7 +55,7 @@ The grid used in the example is as follows:
 {0, 0, 0, 0, 1, 0, 0, 0, 0, 0}
 {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    ```
+    
 
 The start node is at (9, 0) and the target node is at (0, 9).
 
