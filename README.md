@@ -62,4 +62,3 @@ The start node is at (9, 0) and the target node is at (0, 9).
 ### License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
