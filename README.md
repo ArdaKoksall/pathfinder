@@ -19,7 +19,7 @@ This project implements the A\* pathfinding algorithm in Java. The algorithm fin
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/ArdaKoksall/your-repo-name.git
+    git clone https://github.com/ArdaKoksall/pathfinder.git
     ```
 2. Navigate to the project directory:
     ```sh
