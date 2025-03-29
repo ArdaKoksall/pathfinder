@@ -9,9 +9,9 @@ import java.util.Objects;
 public class Node implements Comparable<Node> {
     private final int row;
     private final int col;
-    private int g; // Cost from start to this node
-    private final int h; // Heuristic cost estimate from this node to the target
-    private Node parent; // Parent node for path reconstruction
+    private final int g;
+    private final int h;
+    private final Node parent;
 
     /**
      * Constructs a new Node.
@@ -30,16 +30,12 @@ public class Node implements Comparable<Node> {
         this.parent = parent;
     }
 
-    // Getters
     public int getRow() { return row; }
     public int getCol() { return col; }
     public int getG() { return g; }
 
     public Node getParent() { return parent; }
 
-    // Setters (only for fields that might change during the algorithm)
-    public void setG(int g) { this.g = g; }
-    public void setParent(Node parent) { this.parent = parent; }
 
     /**
      * Calculates the total estimated cost (F = G + H).
@@ -79,11 +75,11 @@ public class Node implements Comparable<Node> {
     @Override
     public String toString() {
         return "Node{" +
-               "row=" + row +
-               ", col=" + col +
-               ", g=" + g +
-               ", h=" + h +
-               ", f=" + getF() +
-               '}';
+                "row=" + row +
+                ", col=" + col +
+                ", g=" + g +
+                ", h=" + h +
+                ", f=" + getF() +
+                '}';
     }
 }
