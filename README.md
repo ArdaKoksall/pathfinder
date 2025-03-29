@@ -1,65 +1,42 @@
-# A\* Pathfinding Algorithm
+# Java A* Pathfinding Visualizer
 
-This project implements the A\* pathfinding algorithm in Java. The algorithm finds the shortest path between two points on a grid, considering obstacles.
+A simple Java program using Swing to show the A* pathfinding algorithm on a grid.
 
-## Features
 
-- Implements the A\* pathfinding algorithm
-- Supports custom grid sizes and obstacle configurations
-- Outputs the path from the start node to the target node
+## What it Does
 
-## Getting Started
+*   Finds the shortest path between a start (Green) and target (Red) point on a grid.
+*   Avoids obstacles (Dark Gray).
+*   Animates the path found (Cyan path with a moving Blue square).
+*   Lets you click grid squares to add/remove obstacles (recalculates path automatically).
+*   Shows "No Path Found" if the target can't be reached.
 
-### Prerequisites
+## How to Run
 
-- Java 8 or higher
-- Maven
-
-### Installation
-
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/ArdaKoksall/pathfinder.git
+1.  **You need Java installed (JDK 8 or newer).**
+2.  **Download the code files:** `Node.java`, `AStarPathfinder.java`, `AStarVisualizer.java`.
+3.  **Open a terminal or command prompt** in the folder where you saved the `.java` files.
+4.  **Compile:**
+    ```bash
+    javac Node.java AStarPathfinder.java AStarVisualizer.java
     ```
-2. Navigate to the project directory:
-    ```sh
-    cd your-repo-name
+5.  **Run:**
+    ```bash
+    java AStarVisualizer
     ```
-3. Build the project using Maven:
-    ```sh
-    mvn clean install
-    ```
+    (Make sure you type `AStarVisualizer` exactly as the filename).
 
-### Usage
+## How to Use
 
-1. Run the `AStarPathfinder` class:
-    ```sh
-    mvn exec:java -Dexec.mainClass="AStarPathfinder"
-    ```
+*   The window will open showing the grid.
+*   If a path is possible, it will draw it and animate the blue square.
+*   Click any white or dark gray square to turn it into an obstacle or back into empty space. The path will update.
 
-2. The program will output the path found by the algorithm, if any.
+## Code Files
 
-### Example
+*   `AStarVisualizer.java`: Handles the drawing, animation, and user clicks (Main program).
+*   `AStarPathfinder.java`: Contains the A* algorithm logic.
+*   `Node.java`: Represents a single square on the grid.
 
-The grid used in the example is as follows:
-0 = free space, 1 = obstacle
-    
-```
-{1, 1, 1, 0, 1, 1, 1, 1, 0, 0} 
-{1, 0, 1, 0, 1, 0, 0, 0, 0, 1}
-{1, 0, 1, 1, 1, 0, 1, 1, 1, 1}
-{1, 0, 0, 0, 0, 0, 1, 0, 1, 0}
-{1, 1, 1, 1, 1, 0, 1, 0, 1, 1}
-{0, 0, 0, 0, 1, 0, 0, 0, 0, 0}
-{1, 1, 1, 0, 1, 1, 1, 1, 1, 0}
-{0, 0, 0, 0, 1, 0, 0, 0, 0, 0}
-{1, 1, 1, 1, 1, 1, 1, 1, 1, 0}
-{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-```
-    
-
-The start node is at (9, 0) and the target node is at (0, 9).
-
-### License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+---
+That's it! Enjoy visualizing A*.

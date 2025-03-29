@@ -2,138 +2,186 @@ package org.example;
 
 import java.util.*;
 
-class Node implements Comparable<Node> {
-    int x, y; // Coordinates
-    int g, h; // g = cost from start to node, h = estimated cost to target
-    Node parent; // Parent node for path reconstruction
-
-    public Node(int x, int y, int g, int h, Node parent) {
-        this.x = x;
-        this.y = y;
-        this.g = g;
-        this.h = h;
-        this.parent = parent;
-    }
-
-    public int getF() {
-        return g + h;
-    }
-
-    @Override
-    public int compareTo(Node other) {
-        return Integer.compare(this.getF(), other.getF());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Node node = (Node) obj;
-        return x == node.x && y == node.y;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(x, y);
-    }
-}
-
+/**
+ * Implements the A* pathfinding algorithm on a 2D grid.
+ */
 public class AStarPathfinder {
-    private static final int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Up, Down, Left, Right
-    private final int[][] grid;
-    private final int width, height;
 
-    public AStarPathfinder(int[][] grid) {
+    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    private final int[][] grid;
+    private final int height;
+    private final int width;
+    private final int obstacleValue;
+
+    /**
+     * Creates an A* pathfinder instance.
+     *
+     * @param grid The grid map where 0 represents traversable space and 1 (or obstacleValue) represents an obstacle.
+     * @param obstacleValue The integer value marking an obstacle in the grid.
+     * @throws IllegalArgumentException if the grid is invalid (null, empty, or non-rectangular).
+     */
+    public AStarPathfinder(int[][] grid, int obstacleValue) {
+        if (grid == null || grid.length == 0 || grid[0].length == 0) {
+            throw new IllegalArgumentException("Grid cannot be null or empty.");
+        }
         this.grid = grid;
         this.height = grid.length;
         this.width = grid[0].length;
+        this.obstacleValue = obstacleValue;
+
+        for (int[] row : grid) {
+            if (row.length != width) {
+                throw new IllegalArgumentException("Grid must be rectangular.");
+            }
+        }
     }
 
-    public List<Node> findShortestPath(Node start, Node target) {
+    /**
+     * Finds the shortest path between a start and target node using the A* algorithm.
+     *
+     * @param startRow The starting row index.
+     * @param startCol The starting column index.
+     * @param targetRow The target row index.
+     * @param targetCol The target column index.
+     * @return A list of Nodes representing the shortest path (including start and target),
+     *         or an empty list if no path is found or start/target are invalid.
+     */
+    public List<Node> findShortestPath(int startRow, int startCol, int targetRow, int targetCol) {
+
+        if (isValid(startRow, startCol) || isValid(targetRow, targetCol)) {
+            System.err.println("Start or Target node is out of bounds.");
+            return Collections.emptyList();
+        }
+        if (isObstacle(startRow, startCol) || isObstacle(targetRow, targetCol)) {
+            System.err.println("Start or Target node is an obstacle.");
+            return Collections.emptyList();
+        }
+
+        Node startNode = new Node(startRow, startCol, 0, heuristic(startRow, startCol, targetRow, targetCol), null);
+        Node targetNode = new Node(targetRow, targetCol, 0, 0, null);
+
         PriorityQueue<Node> openList = new PriorityQueue<>();
-        Set<Node> closedList = new HashSet<>();
-        openList.add(start);
+        Set<Node> closedSet = new HashSet<>();
+
+        openList.add(startNode);
 
         while (!openList.isEmpty()) {
             Node current = openList.poll();
 
-            if (current.equals(target)) {
+            if (current.equals(targetNode)) {
                 return reconstructPath(current);
             }
 
-            closedList.add(current);
+            if (closedSet.contains(current)) {
+                continue;
+            }
+            closedSet.add(current);
 
-            for (int[] direction : directions) {
-                int newX = current.x + direction[0];
-                int newY = current.y + direction[1];
+            for (int[] direction : DIRECTIONS) {
+                int neighborRow = current.getRow() + direction[0];
+                int neighborCol = current.getCol() + direction[1];
 
-                if (isInBounds(newX, newY) && grid[newX][newY] == 0) {
-                    Node neighbor = new Node(newX, newY, current.g + 1, heuristic(newX, newY, target), current);
-
-                    if (closedList.contains(neighbor)) continue;
-
-                    if (!openList.contains(neighbor) || current.g + 1 < neighbor.g) {
-                        neighbor.g = current.g + 1;
-                        neighbor.parent = current;
-                        openList.add(neighbor);
-                    }
+                if (isValid(neighborRow, neighborCol) || isObstacle(neighborRow, neighborCol)) {
+                    continue;
                 }
+
+                Node neighbor = new Node(neighborRow, neighborCol, 0, 0, null);
+
+                if (closedSet.contains(neighbor)) {
+                    continue;
+                }
+
+                int tentativeG = current.getG() + 1;
+
+                int hCost = heuristic(neighborRow, neighborCol, targetRow, targetCol);
+                Node actualNeighbor = new Node(neighborRow, neighborCol, tentativeG, hCost, current);
+
+                openList.add(actualNeighbor);
             }
         }
-        return Collections.emptyList(); // No path found
+
+        System.out.println("No path found.");
+        return Collections.emptyList();
     }
 
-    private boolean isInBounds(int x, int y) {
-        return x >= 0 && y >= 0 && x < width && y < height;
+    /**
+     * Checks if coordinates are within the grid boundaries.
+     */
+    private boolean isValid(int row, int col) {
+        return row < 0 || row >= height || col < 0 || col >= width;
     }
 
-    private int heuristic(int x, int y, Node target) {
-        // Manhattan distance (use Euclidean distance if diagonal movement is allowed)
-        return Math.abs(x - target.x) + Math.abs(y - target.y);
+    /**
+     * Checks if the cell at the given coordinates is an obstacle.
+     */
+    private boolean isObstacle(int row, int col) {
+        return grid[row][col] == this.obstacleValue;
     }
 
-    private List<Node> reconstructPath(Node node) {
-        List<Node> path = new ArrayList<>();
-        while (node != null) {
-            path.add(node);
-            node = node.parent;
+    /**
+     * Calculates the heuristic cost (Manhattan distance) between two points.
+     *
+     * @param r1 Row of the first point.
+     * @param c1 Column of the first point.
+     * @param r2 Row of the second point.
+     * @param c2 Column of the second point.
+     * @return The Manhattan distance.
+     */
+    private int heuristic(int r1, int c1, int r2, int c2) {
+        return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+    }
+
+    /**
+     * Reconstructs the path from the target node back to the start node.
+     *
+     * @param targetNode The target node reached by the algorithm.
+     * @return A list of nodes representing the path from start to target.
+     */
+    private List<Node> reconstructPath(Node targetNode) {
+        List<Node> path = new LinkedList<>();
+        Node current = targetNode;
+        while (current != null) {
+            path.addFirst(current);
+            current = current.getParent();
         }
-        Collections.reverse(path);
         return path;
     }
 
     public static void main(String[] args) {
-        // 0 = free space, 1 = obstacle
+        final int OBSTACLE = 1;
         int[][] grid = {
-                {1, 1, 1, 0, 1, 1, 1, 1, 0, 0}, // Row 0 (top)
-                {1, 0, 1, 0, 1, 0, 0, 0, 0, 1}, // Row 1
-                {1, 0, 1, 1, 1, 0, 1, 1, 1, 1}, // Row 2
-                {1, 0, 0, 0, 0, 0, 1, 0, 1, 0}, // Row 3
-                {1, 1, 1, 1, 1, 0, 1, 0, 1, 1}, // Row 4
-                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0}, // Row 5
-                {1, 1, 1, 0, 1, 1, 1, 1, 1, 0}, // Row 6
-                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0}, // Row 7
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}, // Row 8
-                {0, 0, 0, 0, 0, 0, 1, 0, 0, 0}  // Row 9 (bottom)
-        }; // Column 0 1 2 3 4 5 6 7 8 9
+                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+                {0, 1, 1, 0, 1, 0, 1, 1, 1, 0},
+                {0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+                {1, 1, 0, 1, 1, 1, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+                {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+                {0, 1, 1, 1, 1, 0, 1, 0, 1, 0},
+                {0, 1, 0, 0, 0, 0, 1, 0, 0, 0},
+                {0, 1, 0, 1, 1, 0, 1, 1, 1, 0}
+        };
 
-        AStarPathfinder astar = new AStarPathfinder(grid);
-        Node start = new Node(9, 0, 0, 0, null); // Bottom-left (row 9, col 0)
-        Node target = new Node(0, 9, 0, 0, null); // Top-right (row 0, col 9)
+        AStarPathfinder astar = new AStarPathfinder(grid, OBSTACLE);
 
+        int startRow = 9;
+        int startCol = 0;
+        int targetRow = 0;
+        int targetCol = 9;
 
-        List<Node> path = astar.findShortestPath(start, target);
+        System.out.printf("Finding path from (%d, %d) to (%d, %d)\n", startRow, startCol, targetRow, targetCol);
+
+        long startTime = System.nanoTime();
+        List<Node> path = astar.findShortestPath(startRow, startCol, targetRow, targetCol);
+        long endTime = System.nanoTime();
 
         if (!path.isEmpty()) {
-            System.out.println("Path found:");
+            System.out.println("Path found (" + path.size() + " steps):");
             for (Node node : path) {
-                System.out.println("(" + node.x + ", " + node.y + ")");
-                if(node.x == 0 && node.y == 9){
-                    System.out.println("Target hit!");
-                }
+                System.out.printf(" -> (%d, %d)\n", node.getRow(), node.getCol());
             }
-        } else {
-            System.out.println("No path found.");
+            System.out.println("Target hit!");
         }
+        System.out.printf("Time taken: %.3f ms\n", (endTime - startTime) / 1_000_000.0);
     }
 }
